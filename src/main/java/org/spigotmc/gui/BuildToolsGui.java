@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class BuildToolsGui extends JFrame implements Lockable {
 
@@ -126,7 +127,7 @@ public class BuildToolsGui extends JFrame implements Lockable {
 
     }
 
-    private void onDataReceived(Map<String, CompletableFuture<BuildInfo>> buildInfo) {
+    private void onDataReceived(Map<String, Supplier<CompletableFuture<BuildInfo>>> buildInfo) {
         try {
             menuPane.setEnabled(true);
             // Equivalent to JTextArea#setVisible(false)

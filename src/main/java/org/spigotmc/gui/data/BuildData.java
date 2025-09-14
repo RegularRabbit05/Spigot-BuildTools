@@ -1,5 +1,6 @@
 package org.spigotmc.gui.data;
 
+import com.google.common.base.Suppliers;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.jeff_media.javafinder.JavaInstallation;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,13 +33,13 @@ public final class BuildData {
     private static final Pattern QUOTE_PATTERN = Pattern.compile("\".*?\"");
     private static final String VERSION_PATTERN = "\\b\\d+\\.[\\.\\d]*";
 
-    private final Map<String, CompletableFuture<BuildInfo>> builds = new HashMap<>();
+    private final Map<String, Supplier<CompletableFuture<BuildInfo>>> builds = new HashMap<>();
     private final List<String> versions = new ArrayList<>();
 
     private JavaInstallationManager javaInstallationManager;
     private String latestVersion = "unknown";
 
-    public BuildData(final Consumer<Map<String, CompletableFuture<BuildInfo>>> whenComplete) {
+    public BuildData(final Consumer<Map<String, Supplier<CompletableFuture<BuildInfo>>>> whenComplete) {
         retrieveBuildInfo(whenComplete);
     }
 
@@ -106,7 +108,7 @@ public final class BuildData {
             checkVersion = mostRecent;
         }
 
-        return builds.get(checkVersion).thenApply((BuildInfo info) -> {
+        return builds.get(checkVersion).get().thenApply((BuildInfo info) -> {
             if (buildSettings.isOverrideJavaExecutable()) {
                 javaInstallationManager.setSelectedInstallation(javaInstallationManager.getSelectedInstallation());
                 return true;
@@ -179,7 +181,7 @@ public final class BuildData {
         return javaInstallationManager;
     }
 
-    private void retrieveBuildInfo(final Consumer<Map<String, CompletableFuture<BuildInfo>>> whenComplete) {
+    private void retrieveBuildInfo(final Consumer<Map<String, Supplier<CompletableFuture<BuildInfo>>>> whenComplete) {
         CompletableFuture.runAsync(() -> {
             final URLConnection connection;
             try {
@@ -224,14 +226,14 @@ public final class BuildData {
     }
 
     private String retrieveLatestVersion() {
-        BuildInfo latestInfo = builds.get("latest").join();
+        BuildInfo latestInfo = builds.get("latest").get().join();
 
         for (String version : versions) {
             if (version.equals("latest") || version.equals("experimental")) {
                 continue;
             }
 
-            final BuildInfo info = builds.get(version).join();
+            final BuildInfo info = builds.get(version).get().join();
             if (info.getName().equals(latestInfo.getName())) {
                 return version;
             }
@@ -241,13 +243,15 @@ public final class BuildData {
         return "unknown";
     }
 
-    private CompletableFuture<BuildInfo> futureBuildInfo(String version) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return new Gson().fromJson(Builder.get("https://hub.spigotmc.org/versions/" + version + ".json"), BuildInfo.class);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    private Supplier<CompletableFuture<BuildInfo>> futureBuildInfo(String version) {
+        return Suppliers.memoize(() -> {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return new Gson().fromJson(Builder.get("https://hub.spigotmc.org/versions/" + version + ".json"), BuildInfo.class);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         });
     }
 
