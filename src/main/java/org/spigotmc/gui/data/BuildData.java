@@ -262,14 +262,15 @@ public final class BuildData {
 
             int result = 0;
             if (aSplit.length > 1 && bSplit.length > 1) {
-                int aVer = Integer.parseInt(aSplit[1]);
-                int bVer = Integer.parseInt(bSplit[1]);
+                for (int i = 0; i < Math.min(aSplit.length, bSplit.length); i++) {
+                    int aVer = Integer.parseInt(aSplit[i]);
+                    int bVer = Integer.parseInt(bSplit[i]);
 
-                result = Integer.compare(bVer, aVer);
-            }
-
-            if (result == 0 && aSplit.length > 2 && bSplit.length > 2) {
-                result = bSplit[2].compareTo(aSplit[2]);
+                    result = Integer.compare(bVer, aVer);
+                    if (result != 0) {
+                        break;
+                    }
+                }
             }
 
             return result;
