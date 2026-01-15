@@ -505,14 +505,26 @@ public class Builder
             {
                 versionInfo.setClassMapCommand( "java -jar BuildData/bin/SpecialSource-2.jar map -i {0} -m {1} -o {2}" );
             }
-            runProcess( CWD, MessageFormat.format( versionInfo.getClassMapCommand(), vanillaJar.getPath(), classMappings.getPath(), clMappedJar.getPath() ).split( " " ) );
+            if ( versionInfo.getClassMapCommand().isEmpty() )
+            {
+                clMappedJar = vanillaJar;
+            } else
+            {
+                runProcess( CWD, MessageFormat.format( versionInfo.getClassMapCommand(), vanillaJar.getPath(), classMappings.getPath(), clMappedJar.getPath() ).split( " " ) );
+            }
 
             if ( versionInfo.getMemberMapCommand() == null )
             {
                 versionInfo.setMemberMapCommand( "java -jar BuildData/bin/SpecialSource-2.jar map -i {0} -m {1} -o {2}" );
             }
-            runProcess( CWD, MessageFormat.format( versionInfo.getMemberMapCommand(), clMappedJar.getPath(),
-                    memberMappings.getPath(), mMappedJar.getPath() ).split( " " ) );
+            if ( versionInfo.getMemberMapCommand().isEmpty() )
+            {
+                mMappedJar = clMappedJar;
+            } else
+            {
+                runProcess( CWD, MessageFormat.format( versionInfo.getMemberMapCommand(), clMappedJar.getPath(),
+                        memberMappings.getPath(), mMappedJar.getPath() ).split( " " ) );
+            }
 
             if ( versionInfo.getFinalMapCommand() == null )
             {
