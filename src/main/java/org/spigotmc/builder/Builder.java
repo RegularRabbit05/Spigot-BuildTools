@@ -64,6 +64,7 @@ import joptsimple.OptionSet;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.TeeOutputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
@@ -739,12 +740,13 @@ public class Builder
         String bootstrap = ( versionInfo.getToolsVersion() >= 138 ) ? "-bootstrap" : "";
         String suffix = base + bootstrap + fileExtension;
 
-        String finalName = "spigot-" + versionInfo.getMinecraftVersion() + fileExtension;
+        String minecraftVersion = StringUtils.substringBefore( versionInfo.getMinecraftVersion(), "_unobfuscated" );
+        String finalName = "spigot-" + minecraftVersion + fileExtension;
 
         if ( options.has( Flags.EXPERIMENTAL_FLAG ) )
         {
-            suffix = versionInfo.getMinecraftVersion() + experimental + snapshot + bootstrap + fileExtension;
-            finalName = "spigot-" + versionInfo.getMinecraftVersion() + experimental + fileExtension;
+            suffix = minecraftVersion + experimental + snapshot + bootstrap + fileExtension;
+            finalName = "spigot-" + minecraftVersion + experimental + fileExtension;
         }
 
         if ( Flags.OUTPUT_NAME_FLAG.value( options ) != null )
@@ -754,7 +756,7 @@ public class Builder
 
         if ( compile.contains( Compile.CRAFTBUKKIT ) )
         {
-            copyJar( "CraftBukkit/target", "craftbukkit", suffix, new File( Flags.OUTPUT_DIR_FLAG.value( options ), "craftbukkit-" + versionInfo.getMinecraftVersion() + ".jar" ) );
+            copyJar( "CraftBukkit/target", "craftbukkit", suffix, new File( Flags.OUTPUT_DIR_FLAG.value( options ), "craftbukkit-" + minecraftVersion + ".jar" ) );
         }
 
         if ( compile.contains( Compile.SPIGOT ) )
