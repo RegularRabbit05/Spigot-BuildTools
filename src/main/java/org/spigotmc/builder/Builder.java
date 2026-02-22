@@ -312,7 +312,7 @@ public class Builder
         File spigot = new File( "Spigot" );
         if ( !spigot.exists() || !containsGit( spigot ) )
         {
-            clone( "https://hub.spigotmc.org/stash/scm/spigot/spigot.git", spigot );
+            clone( "https://github.com/regularRabbit05/forkit.git", spigot );
         }
 
         File buildData = new File( "BuildData" );
