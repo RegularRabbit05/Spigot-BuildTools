@@ -250,7 +250,7 @@ public class Builder
             String verInfo;
             try
             {
-                verInfo = get( "https://hub.spigotmc.org/versions/" + askedVersion + ".json" );
+                verInfo = get( "https://raw.githubusercontent.com/RegularRabbit05/SpigotVersionsHashesForkIt/refs/heads/main/versions/" + askedVersion + ".json" );
             } catch ( IOException ex )
             {
                 System.err.println( "Could not get version " + askedVersion + " does it exist? Try another version or use 'latest'" );
@@ -260,35 +260,8 @@ public class Builder
             }
             System.out.println( "Found version" );
             System.out.println( verInfo );
-            
-            String replacementLatestHash;
-            try
-            {
-                String latestCommitResponse = get( "https://api.github.com/repos/RegularRabbit05/Forkit/commits?per_page=1" );
-                JsonArray latestCommits = new Gson().fromJson( latestCommitResponse, JsonArray.class );
-                if ( latestCommits == null || latestCommits.size() == 0 || !latestCommits.get( 0 ).isJsonObject() || !latestCommits.get( 0 ).getAsJsonObject().has( "sha" ) )
-                {
-                    throw new IOException( "Could not parse latest commit sha from Forkit API response" );
-                }
-                replacementLatestHash = latestCommits.get( 0 ).getAsJsonObject().get( "sha" ).getAsString();
-            } catch ( IOException ex )
-            {
-                ex.printStackTrace();
-                System.exit( 1 );
-                return;
-            }
-            
-            Gson gson = new Gson();
-            JsonObject versionInfoJson = gson.fromJson( verInfo, JsonObject.class );
-            if ( versionInfoJson == null || !versionInfoJson.has( "refs" ) || !versionInfoJson.get( "refs" ).isJsonObject() )
-            {
-                throw new IOException( "Could not parse version refs from Spigot version response" );
-            }
 
-            versionInfoJson.getAsJsonObject( "refs" ).addProperty( "Spigot", replacementLatestHash );
-            String replacedVerInfo = gson.toJson( versionInfoJson );
-
-            buildInfo = gson.fromJson( replacedVerInfo, BuildInfo.class );
+            buildInfo = new Gson().fromJson( verInfo, BuildInfo.class );
 
             if ( buildNumber != -1 && buildInfo.getToolsVersion() != -1 && buildNumber < buildInfo.getToolsVersion() )
             {
