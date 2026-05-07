@@ -13,6 +13,7 @@ import org.spigotmc.gui.panels.general.console.ConsolePanelHeader;
 import org.spigotmc.gui.panels.general.settings.SettingsPanel;
 import org.spigotmc.gui.panels.general.settings.SettingsPanelHeader;
 import org.spigotmc.gui.panels.general.settings.VersionWarningPane;
+import org.spigotmc.utils.AwtExecutor;
 import org.spigotmc.utils.Constants;
 import org.spigotmc.utils.SwingUtils;
 import org.spigotmc.utils.Utils;
@@ -191,7 +192,7 @@ public class GeneralPanel extends JPanel implements Lockable {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }).whenComplete((Integer exitValue, Throwable throwable) -> {
+        }).whenCompleteAsync((Integer exitValue, Throwable throwable) -> {
             cancelButton.setEnabled(false);
             buildButton.setText("Compile");
             progressBar.setIndeterminate(false);
@@ -237,7 +238,7 @@ public class GeneralPanel extends JPanel implements Lockable {
             if (settingsPanel.getOutputDirField().getText().isEmpty()) {
                 buildSettings.setOutputDirectory("");
             }
-        });
+        }, AwtExecutor.INSTANCE);
     }
 
     private void debugInfoButtonActionPerformed(ActionEvent event) {
